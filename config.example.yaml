@@ -1,0 +1,8 @@
+server:
+  port: 4141
+  host: localhost
+sessions:
+  max_age: 604800
+valkey:
+  db: 0
+  port: 6379

@@ -1,0 +1,3 @@
+litestar[standard, picologging]~=2.15
+valkey~=6.1
+PyYAML~=6.0
