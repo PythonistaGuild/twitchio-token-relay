@@ -13,29 +13,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from typing import TypedDict
-
-
-class ServerT(TypedDict):
-    port: int
-    host: str
-
-
-class SessionsT(TypedDict):
-    max_age: int
-
-
-class ValkeyT(TypedDict):
-    db: int
-    port: int
-
-
-class DatabaseT(TypedDict):
-    dsn: str
-
-
-class ConfigT(TypedDict):
-    server: ServerT
-    sessions: SessionsT
-    valkey: ValkeyT
-    database: DatabaseT
+__all__ = ()

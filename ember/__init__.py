@@ -15,3 +15,4 @@ limitations under the License.
 
 from .app import App as App
 from .config import config as config
+from .database import Database as Database

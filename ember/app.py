@@ -23,11 +23,13 @@ from litestar.stores.valkey import ValkeyStore
 
 from .config import config
 from .controllers import *
+from .database import Database
 
 
 if TYPE_CHECKING:
     from litestar import Controller
     from litestar.middleware import DefineMiddleware
+    from litestar.stores.base import Store
 
 
 class App(Litestar):
@@ -35,10 +37,31 @@ class App(Litestar):
         self.config = config
 
         store = ValkeyStore.with_client(db=config["valkey"]["db"], port=config["valkey"]["port"])
-        stores: dict[str, ValkeyStore] = {"sessions": store}
+        stores: dict[str, Store] = {"sessions": store}
 
         sessions = ServerSideSessionConfig(max_age=config["sessions"]["max_age"], renew_on_access=True, secure=True)
         middleware: list[DefineMiddleware] = [sessions.middleware]
 
         controllers: list[type[Controller]] = [APIControllerV1]
-        super().__init__(route_handlers=controllers, stores=stores, middleware=middleware, **kwargs)  # type: ignore
+        super().__init__(  # type: ignore
+            route_handlers=controllers,
+            stores=stores,
+            middleware=middleware,
+            on_startup=[self.on_startup],
+            on_shutdown=[self.on_shutdown],
+            **kwargs,
+        )
+
+    async def on_startup(self, app: Litestar) -> None:
+        dsn = config["database"]["dsn"]
+
+        db = Database(dsn=dsn)
+        await db.connect()
+
+        app.state.db = db
+
+    async def on_shutdown(self, app: Litestar) -> None:
+        db: Database | None = app.state.get("db")
+
+        if db:
+            await db.close()
