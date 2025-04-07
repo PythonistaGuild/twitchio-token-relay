@@ -19,6 +19,7 @@ from typing import TypedDict
 class ServerT(TypedDict):
     port: int
     host: str
+    domain: str
 
 
 class SessionsT(TypedDict):
@@ -34,8 +35,14 @@ class DatabaseT(TypedDict):
     dsn: str
 
 
+class TwitchT(TypedDict):
+    client_id: str
+    client_secret: str
+
+
 class ConfigT(TypedDict):
     server: ServerT
     sessions: SessionsT
     valkey: ValkeyT
     database: DatabaseT
+    twitch: TwitchT

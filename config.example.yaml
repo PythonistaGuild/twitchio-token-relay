@@ -1,6 +1,7 @@
 server:
   port: 4141
   host: localhost
+  domain: https://tokens.twitchio.dev
 sessions:
   max_age: 604800
 valkey:
@@ -8,3 +9,6 @@ valkey:
   port: 6379
 database:
   dsn: postgres://USER:PASSWORD@localhost:5432/DATABASE
+twitch:
+  client_id:
+  client_secret: 

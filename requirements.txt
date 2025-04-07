@@ -3,3 +3,4 @@ valkey~=6.1
 PyYAML~=6.0
 asyncpg~=0.30
 asyncpg-stubs~=0.30
+aiohttp
