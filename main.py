@@ -34,7 +34,14 @@ def main() -> None:
     port = config["server"]["port"]
 
     async def runner() -> None:
-        conf = uvicorn.Config("main:create_app", host=host, port=port, proxy_headers=True, forwarded_allow_ips="*")
+        conf = uvicorn.Config(
+            "main:create_app",
+            host=host,
+            port=port,
+            proxy_headers=True,
+            forwarded_allow_ips="*",
+            factory=True,
+        )
         server = uvicorn.Server(conf)
 
         await server.serve()
