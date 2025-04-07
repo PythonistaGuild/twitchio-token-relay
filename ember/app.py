@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from aiohttp import ClientSession
 from litestar import Litestar
 from litestar.middleware.session.server_side import ServerSideSessionConfig
 from litestar.stores.valkey import ValkeyStore
@@ -42,7 +43,7 @@ class App(Litestar):
         sessions = ServerSideSessionConfig(max_age=config["sessions"]["max_age"], renew_on_access=True, secure=True)
         middleware: list[DefineMiddleware] = [sessions.middleware]
 
-        controllers: list[type[Controller]] = [APIControllerV1]
+        controllers: list[type[Controller]] = [APIControllerV1, SessionsController]
         super().__init__(  # type: ignore
             route_handlers=controllers,
             stores=stores,
@@ -53,6 +54,7 @@ class App(Litestar):
         )
 
     async def on_startup(self, app: Litestar) -> None:
+        # Database...
         dsn = config["database"]["dsn"]
 
         db = Database(dsn=dsn)
@@ -60,8 +62,20 @@ class App(Litestar):
 
         app.state.db = db
 
+        # State store...
+        store = ValkeyStore.with_client(db=config["valkey"]["db"], port=config["valkey"]["port"])
+        app.state.states = store
+
+        # aiohttp Session
+        session = ClientSession()
+        app.state.aiohttp = session
+
     async def on_shutdown(self, app: Litestar) -> None:
         db: Database | None = app.state.get("db")
+        sess: ClientSession | None = app.state.get("aiohttp")
 
         if db:
             await db.close()
+
+        if sess:
+            await sess.close()

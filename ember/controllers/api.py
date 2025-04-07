@@ -15,6 +15,7 @@ limitations under the License.
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 import litestar
@@ -26,6 +27,9 @@ if TYPE_CHECKING:
 
 
 __all__ = ("APIControllerV1",)
+
+
+LOGGER: logging.Logger = logging.getLogger(__name__)
 
 
 class APIControllerV1(litestar.Controller):
