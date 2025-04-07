@@ -6,3 +6,5 @@ sessions:
 valkey:
   db: 0
   port: 6379
+database:
+  dsn: postgres://USER:PASSWORD@localhost:5432/DATABASE
