@@ -19,7 +19,9 @@ from typing import TYPE_CHECKING, Any
 
 from aiohttp import ClientSession
 from litestar import Litestar
+from litestar.logging import LoggingConfig
 from litestar.middleware.session.server_side import ServerSideSessionConfig
+from litestar.static_files import create_static_files_router  # type: ignore
 from litestar.stores.valkey import ValkeyStore
 
 from .config import config
@@ -30,6 +32,7 @@ from .database import Database
 if TYPE_CHECKING:
     from litestar import Controller
     from litestar.middleware import DefineMiddleware
+    from litestar.router import Router
     from litestar.stores.base import Store
 
 
@@ -43,13 +46,27 @@ class App(Litestar):
         sessions = ServerSideSessionConfig(max_age=config["sessions"]["max_age"], renew_on_access=True, secure=True)
         middleware: list[DefineMiddleware] = [sessions.middleware]
 
-        controllers: list[type[Controller]] = [APIControllerV1, SessionsController]
+        static = create_static_files_router(
+            path="/",
+            directories=["eira/dist"],
+            html_mode=True,
+        )
+
+        handlers: list[type[Controller] | Router] = [APIControllerV1, SessionsController, static]
+
+        logging_config = LoggingConfig(
+            root={"level": "INFO", "handlers": ["queue_listener"]},
+            formatters={"standard": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}},
+            log_exceptions="always",
+        )
+
         super().__init__(  # type: ignore
-            route_handlers=controllers,
+            route_handlers=handlers,
             stores=stores,
             middleware=middleware,
             on_startup=[self.on_startup],
             on_shutdown=[self.on_shutdown],
+            logging_config=logging_config,
             **kwargs,
         )
 
