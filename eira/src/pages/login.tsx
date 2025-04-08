@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type { UserDataT } from "../types/responses";
 import { useLocation } from "wouter";
-import "./index.css";
 
 
-function Index() {
-    const [user, setUser] = useState<UserDataT>();
+function LoginPage() {
     const [, navigate] = useLocation();
 
     async function fetchUser() {
@@ -15,7 +13,7 @@ function Index() {
             resp = await fetch("/users/@me", {"credentials": "include"});
         } catch (error) {
             console.error(error);
-            return navigate("/login");
+            return
         }
 
         if (!resp.ok) {
@@ -24,10 +22,10 @@ function Index() {
 
         const data: UserDataT = await resp.json()
         if (!data) {
-            return navigate("/login");
+            return
         }
 
-        setUser(data);
+        return navigate("/");
     }
 
     useEffect(() => {
@@ -36,9 +34,9 @@ function Index() {
 
     return (
         <>
-            {user?.name}
+            Login
         </>
     )
 }
 
-export default Index
+export default LoginPage
