@@ -52,7 +52,12 @@ class App(Litestar):
         store = ValkeyStore.with_client(db=config["valkey"]["db"], port=config["valkey"]["port"])
         stores: dict[str, Store] = {"sessions": store}
 
-        sessions = ServerSideSessionConfig(max_age=config["sessions"]["max_age"], renew_on_access=True, secure=True, httponly=False)
+        sessions = ServerSideSessionConfig(
+            max_age=config["sessions"]["max_age"],
+            renew_on_access=True,
+            secure=True,
+            httponly=False,
+        )
         middleware: list[DefineMiddleware] = [sessions.middleware]
 
         static = create_static_files_router(
