@@ -13,4 +13,76 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-__all__ = ()
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+import asyncpg
+
+
+if TYPE_CHECKING:
+    from types_.models import FullUserRecordDT, UserRecordDT
+
+
+__all__ = ("FullUserRecord", "UserRecord")
+
+
+class UserRecord(asyncpg.Record):
+    id: int
+    twitch_id: str
+    name: str
+    token: str
+
+    def __getattr__(self, attr: str) -> Any:
+        return self[attr]
+
+    def to_dict(self, include_token: bool = True) -> UserRecordDT:
+        return {
+            "id": self.id,
+            "twitch_id": self.twitch_id,
+            "name": self.name,
+            "token": self.token if include_token else None,
+        }
+
+
+class FullUserRecord(asyncpg.Record):
+    id: int
+    twitch_id: str
+    name: str
+    token: str | None
+    application_id: str | None
+    client_id: str | None
+    application_name: str | None
+    scopes: str | None
+    bot_scopes: str | None
+    auths: int | None
+    allowed: str | None
+
+    def __getattr__(self, attr: str) -> Any:
+        return self[attr]
+
+    def to_dict(self, include_user: bool = False, include_token: bool = False) -> FullUserRecordDT:
+        data: FullUserRecordDT = {}
+
+        if include_user:
+            data.update(
+                {
+                    "id": self.id,
+                    "twitch_id": self.twitch_id,
+                    "name": self.name,
+                    "token": self.token if include_token else None,
+                }
+            )
+
+        data.update(
+            {
+                "application_id": self.application_id,
+                "client_id": self.client_id,
+                "application_name": self.application_name,
+                "scopes": self.scopes,
+                "bot_scopes": self.bot_scopes,
+                "auths": self.auths,
+                "allowed": self.allowed,
+            }
+        )
+        return data

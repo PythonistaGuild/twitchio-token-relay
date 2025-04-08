@@ -15,6 +15,7 @@ limitations under the License.
 
 import asyncio
 import logging
+import secrets
 from typing import TYPE_CHECKING, Any, Self
 
 import asyncpg
@@ -69,3 +70,74 @@ class Database:
 
     async def __aexit__(self, *args: Any, **kwargs: Any) -> None:
         await self.close()
+
+    async def create_user(self, twitch_id: str, twitch_name: str) -> UserRecord:
+        query = """
+        INSERT INTO users (twitch_id, token, name) VALUES($1, $2, $3)
+        ON CONFLICT (twitch_id) DO UPDATE SET name = $3
+        RETURNING *
+        """
+
+        token = secrets.token_urlsafe(64)
+
+        async with self.pool.acquire() as connection:
+            row: UserRecord | None = await connection.fetchrow(query, twitch_id, token, twitch_name, record_class=UserRecord)
+
+        assert row
+        return row
+
+    async def fetch_user_by_id(self, user_id: int) -> list[FullUserRecord]:
+        query = """
+        SELECT
+            u.*,
+            a.id AS application_id,
+            a.client_id,
+            a.name AS application_name,
+            a.scopes,
+            a.bot_scopes,
+            a.auths,
+            w.allowed
+        FROM
+            users u
+        LEFT JOIN
+            applications a ON u.id = a.user_id
+        LEFT JOIN
+            whitelist w ON a.id = w.application_id
+        WHERE
+            u.id = $1
+        ORDER BY
+            a.id, w.allowed;
+        """
+
+        async with self.pool.acquire() as connection:
+            rows: list[FullUserRecord] = await connection.fetch(query, user_id, record_class=FullUserRecord)
+
+        return rows
+
+    async def fetch_user_by_twitch(self, twitch_id: str) -> list[FullUserRecord]:
+        query = """
+        SELECT
+            u.*,
+            a.id AS application_id,
+            a.client_id,
+            a.name AS application_name,
+            a.scopes,
+            a.bot_scopes,
+            a.auths,
+            w.allowed
+        FROM
+            users u
+        LEFT JOIN
+            applications a ON u.id = a.user_id
+        LEFT JOIN
+            whitelist w ON a.id = w.application_id
+        WHERE
+            u.twitch_id = $1
+        ORDER BY
+            a.id, w.allowed;
+        """
+
+        async with self.pool.acquire() as connection:
+            rows: list[FullUserRecord] = await connection.fetch(query, twitch_id, record_class=FullUserRecord)
+
+        return rows
