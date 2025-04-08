@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import logging
 import secrets
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import litestar
 from litestar.response import Redirect, Response
@@ -30,6 +30,8 @@ if TYPE_CHECKING:
     from litestar import Request
     from litestar.datastructures import State
     from litestar.stores.valkey import ValkeyStore
+
+    from ..database import Database
 
 
 __all__ = ("SessionsController",)
@@ -52,7 +54,7 @@ class SessionsController(litestar.Controller):
     @litestar.get("/login")
     async def login_endpoint(self, request: Request[str, str, State], state: State) -> Redirect:
         if request.session:
-            return Redirect("/users/dashboard")
+            return Redirect("/")
 
         client_id = config["twitch"]["client_id"]
         redirect_uri = f"{config['server']['domain']}/users/redirect"
@@ -73,8 +75,18 @@ class SessionsController(litestar.Controller):
 
         return Redirect(url)
 
+    @litestar.get("/logout")
+    async def logout_endpoint(self, request: Request[str, str, State]) -> Redirect:
+        if request.session:
+            request.clear_session()
+
+        return Redirect("/")
+
     @litestar.get("/redirect")
-    async def redirect_endpoint(self, request: Request[str, str, State], state: State) -> ...:
+    async def redirect_endpoint(self, request: Request[str, str, State], state: State) -> Redirect | Response[str]:
+        if request.session:
+            return Redirect("/")
+
         error = request.query_params.get("error")
 
         if error:
@@ -134,9 +146,31 @@ class SessionsController(litestar.Controller):
         if not user_id:
             Response("An internal error occurred. Try again.", status_code=500)
 
-        request.set_session({user_id: user_login})  # type: ignore
-        return Redirect("/users/dashboard")
+        db: Database = state.db
+        data = await db.create_user(user_id, user_login)
 
-    @litestar.get("/dashboard")
-    async def dashboard_endpoint(self, request: Request[str, str, State]) -> str:
-        return f"Logged in as {request.session}"
+        request.set_session(data.to_dict(include_token=False))  # type: ignore
+        return Redirect("/")
+
+    @litestar.get("/@me")
+    async def current_user_endpoint(self, request: Request[str, str, State], state: State) -> dict[str, Any]:
+        if not request.session:
+            return {}
+
+        db: Database = state.db
+        rows = await db.fetch_user_by_id(request.session["id"])
+
+        if not rows:
+            request.clear_session()
+            return {}
+
+        first = rows[0]
+
+        data = {
+            "id": first.id,
+            "twitch_id": first.twitch_id,
+            "name": first.name,
+            "applications": [app.to_dict() for app in rows if app.application_id is not None],
+        }
+
+        return data
