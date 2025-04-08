@@ -153,16 +153,16 @@ class SessionsController(litestar.Controller):
         return Redirect("/")
 
     @litestar.get("/@me")
-    async def current_user_endpoint(self, request: Request[str, str, State], state: State) -> dict[str, Any]:
+    async def current_user_endpoint(self, request: Request[str, str, State], state: State) -> dict[str, Any] | None:
         if not request.session:
-            return {}
+            return None
 
         db: Database = state.db
         rows = await db.fetch_user_by_id(request.session["id"])
 
         if not rows:
             request.clear_session()
-            return {}
+            return None
 
         first = rows[0]
 

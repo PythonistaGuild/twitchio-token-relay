@@ -20,6 +20,7 @@ class ServerT(TypedDict):
     port: int
     host: str
     domain: str
+    build: str
 
 
 class SessionsT(TypedDict):

@@ -15,12 +15,16 @@ limitations under the License.
 
 from __future__ import annotations
 
+import pathlib
 from typing import TYPE_CHECKING, Any
 
 from aiohttp import ClientSession
-from litestar import Litestar
+from litestar import Litestar, get
 from litestar.logging import LoggingConfig
 from litestar.middleware.session.server_side import ServerSideSessionConfig
+from litestar.params import ParameterKwarg
+from litestar.response.file import File
+from litestar.router import Router
 from litestar.static_files import create_static_files_router  # type: ignore
 from litestar.stores.valkey import ValkeyStore
 
@@ -32,8 +36,13 @@ from .database import Database
 if TYPE_CHECKING:
     from litestar import Controller
     from litestar.middleware import DefineMiddleware
-    from litestar.router import Router
     from litestar.stores.base import Store
+
+
+@get("/")
+async def dynamic_dist_route(name: str) -> File:
+    dist = config["server"]["build"]
+    return File(f"{dist}/{name}.html", media_type="text/html", content_disposition_type="inline")
 
 
 class App(Litestar):
@@ -47,11 +56,9 @@ class App(Litestar):
         middleware: list[DefineMiddleware] = [sessions.middleware]
 
         static = create_static_files_router(
-            path="/",
-            directories=["eira/dist"],
-            html_mode=True,
+            path="/assets",
+            directories=["eira/dist/assets"],
         )
-
         handlers: list[type[Controller] | Router] = [APIControllerV1, SessionsController, static]
 
         logging_config = LoggingConfig(
@@ -86,6 +93,21 @@ class App(Litestar):
         # aiohttp Session
         session = ClientSession()
         app.state.aiohttp = session
+
+        # Add built routes from frontend
+        dist = config["server"]["build"]
+        root = pathlib.Path(dist)
+
+        for path in root.glob("*.html"):
+            name = path.name.removesuffix(".html")
+            route_path = f"/{name}" if name != "index" else "/"
+
+            route = Router(
+                route_path,
+                route_handlers=[dynamic_dist_route],
+                parameters={"name": ParameterKwarg(default=name, const=True)},
+            )
+            self.register(route)
 
     async def on_shutdown(self, app: Litestar) -> None:
         db: Database | None = app.state.get("db")
