@@ -1,15 +1,21 @@
 {
-    "linter": {
-      "rules": {
-        "style": {
-          "noNonNullAssertion": "off"
-        },
-        "a11y": {
-          "useKeyWithClickEvents": "off"
-        },
-        "correctness": {
-          "useExhaustiveDependencies": "off"
-        }
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "lineEnding": "lf"
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "noNonNullAssertion": "off"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off"
       }
     }
   }
+}

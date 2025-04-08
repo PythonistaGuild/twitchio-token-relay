@@ -1,29 +1,29 @@
 {
-	"name": "eira",
-	"private": true,
-	"version": "0.0.1",
-	"type": "module",
-	"scripts": {
-		"dev": "vite",
-		"build": "tsc -b && vite build",
-		"lint": "biome lint ./src",
-		"preview": "vite preview"
-	},
-	"dependencies": {
-		"glob": "^11.0.1",
-		"react": "^19.1.0",
-		"react-cookie": "^8.0.1",
-		"react-dom": "^19.1.0",
-		"wouter": "^3.6.0"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
-		"@types/node": "^22.14.0",
-		"@types/react": "^19.1.0",
-		"@types/react-dom": "^19.1.1",
-		"@vitejs/plugin-react": "^4.3.4",
-		"typescript": "5.8.3",
-		"vite": "6.2.5",
-		"vite-plugin-svgr": "4.3.0"
-	}
+  "name": "eira",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "biome lint ./src",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "glob": "^11.0.1",
+    "react": "^19.1.0",
+    "react-cookie": "^8.0.1",
+    "react-dom": "^19.1.0",
+    "wouter": "^3.6.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "5.8.3",
+    "vite": "6.2.5",
+    "vite-plugin-svgr": "4.3.0"
+  }
 }
