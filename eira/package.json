@@ -10,12 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "glob": "^11.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "wouter": "^3.6.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@types/node": "^22.14.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.1",
     "@vitejs/plugin-react": "^4.3.4",
