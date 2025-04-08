@@ -1,13 +1,19 @@
 import { useEffect } from "react";
 import type { UserDataT } from "../types/responses";
 import { useLocation } from "wouter";
+import { useCookies } from 'react-cookie'
 
 
 function LoginPage() {
     const [, navigate] = useLocation();
+    const [cookies, , removeCookie] = useCookies(["session"])
 
     async function fetchUser() {
         let resp: Response;
+
+        if (!cookies.session) {
+            return
+        }
 
         try {
             resp = await fetch("/users/@me", {"credentials": "include"});
@@ -22,6 +28,7 @@ function LoginPage() {
 
         const data: UserDataT = await resp.json()
         if (!data) {
+            removeCookie("session", cookies.session);
             return
         }
 

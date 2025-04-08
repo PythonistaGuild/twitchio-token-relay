@@ -2,14 +2,20 @@ import { useEffect, useState } from "react";
 import type { UserDataT } from "../types/responses";
 import { useLocation } from "wouter";
 import "./index.css";
+import { useCookies } from 'react-cookie'
 
 
 function Index() {
     const [user, setUser] = useState<UserDataT>();
     const [, navigate] = useLocation();
+    const [cookies, , removeCookie] = useCookies(["session"])
 
     async function fetchUser() {
         let resp: Response;
+
+        if (!cookies.session) {
+            return navigate("/login");
+        }
 
         try {
             resp = await fetch("/users/@me", {"credentials": "include"});
@@ -24,6 +30,7 @@ function Index() {
 
         const data: UserDataT = await resp.json()
         if (!data) {
+            removeCookie("session", cookies.session);
             return navigate("/login");
         }
 
