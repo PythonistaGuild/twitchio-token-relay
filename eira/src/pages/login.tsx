@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import type { UserDataT } from "../types/responses";
 import { useLocation } from "wouter";
 import { useCookies } from "react-cookie";
+import "./css/login.css";
+import TwitchLogo from "../assets/twitch.svg";
 
 function LoginPage() {
   const [, navigate] = useLocation();
@@ -38,7 +40,81 @@ function LoginPage() {
     fetchUser();
   }, []);
 
-  return <>Login</>;
+  return (
+    <>
+      <div className="loginLeft">
+        <h1>TwitchIO Token Relay</h1>
+        <hr />
+
+        <div className="infoSec">
+          <h3>About</h3>
+          <p>
+            The TwitchIO Token Relay is a service provided to relay OAuth requests from Twitch to your Twitch
+            Application. We do this by providing a public URL that you, or anyone else wanting to use your application,
+            can visit to directly authorize your Twitch Application with the appropriate scopes. The exchange occurs
+            over websockets, so you don't need a public domain or exposed IP with open ports.
+            <br />
+            <br />
+            We <b className="warningRed">DO NOT</b> store tokens or any other secret information relating to your
+            application.
+            <br />
+            <br />
+            We <b className="warningRed">DO</b> store your Twitch User ID and Twitch Application Client-ID.
+            <br />
+            <br />
+            You can view the source for this service on{" "}
+            <a href="https://github.com/PythonistaGuild/twitchio-token-relay">GitHub</a>
+            <br />
+            <br />
+            We are <b className="warningRed">NOT</b> and this service is <b className="warningRed">NOT</b> affiliated
+            with Twitch.
+          </p>
+
+          <h3>Who is this for?</h3>
+          <p>
+            <ul>
+              <li>Anyone without a Public Domain</li>
+              <b>AND</b>
+              <li>Anyone without a Static IP (Or anyone not willing to expose it).</li>
+              <b>OR</b>
+              <li>Anyone not able to open a public port on their IP.</li>
+              <b>AND</b>
+              <li>Anyone who wants to authorize multiple users.</li>
+            </ul>
+          </p>
+
+          <h3 className="warningRed">Who is this NOT for?</h3>
+          <p>
+            <ul>
+              <li>Anyone with a Public Domain</li>
+              <b>OR</b>
+              <li>Anyone who is willing to expose and use a Static IP Address with an open port</li>
+              <b>OR</b>
+              <li>Anyone only Authorizing themselves or their own Applications (Not other users)</li>
+            </ul>
+          </p>
+        </div>
+      </div>
+
+      <div className="loginRight">
+        <div className="loginInfo">
+          <h1>Login</h1>
+          <span>
+            To access the <b>TwitchIO Token Relay</b> please login via Twitch.
+          </span>
+          <span>
+            Please use the account you manage your Twitch Applications with on the{" "}
+            <a href="https://dev.twitch.tv/console">Twitch Developer Console</a>
+          </span>
+
+          <a className="loginButton" href="/users/login">
+            <img src={TwitchLogo} alt="Twitch Logo" />
+            Sign in with Twitch
+          </a>
+        </div>
+      </div>
+    </>
+  );
 }
 
 export default LoginPage;
