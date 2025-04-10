@@ -8,11 +8,12 @@ CREATE TABLE IF NOT EXISTS users(
 CREATE TABLE IF NOT EXISTS applications(
     id TEXT PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    client_id TEXT UNIQUE,
+    client_id TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
+    url TEXT UNIQUE NOT NULL,
     scopes TEXT NOT NULL,
     bot_scopes TEXT NOT NULL,
-    auths BIGINT,
+    auths BIGINT DEFAULT 0,
     UNIQUE (user_id, name),
     CONSTRAINT fk_applications_users FOREIGN KEY (user_id) REFERENCES users (id)
 );
