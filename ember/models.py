@@ -21,10 +21,10 @@ import asyncpg
 
 
 if TYPE_CHECKING:
-    from types_.models import FullUserRecordDT, UserRecordDT
+    from types_.models import ApplicationRecordDT, FullUserRecordDT, UserRecordDT
 
 
-__all__ = ("FullUserRecord", "UserRecord")
+__all__ = ("ApplicationRecord", "FullUserRecord", "UserRecord")
 
 
 class UserRecord(asyncpg.Record):
@@ -42,6 +42,32 @@ class UserRecord(asyncpg.Record):
             "twitch_id": self.twitch_id,
             "name": self.name,
             "token": self.token if include_token else None,
+        }
+
+
+class ApplicationRecord(asyncpg.Record):
+    id: str
+    user_id: int
+    client_id: str
+    name: str
+    url: str
+    scopes: str
+    bot_scopes: str
+    auths: int
+
+    def __getattr__(self, attr: str) -> Any:
+        return self[attr]
+
+    def to_dict(self) -> ApplicationRecordDT:
+        return {
+            "application_id": self.id,
+            "user_id": self.user_id,
+            "client_id": self.client_id,
+            "application_name": self.name,
+            "url": self.url,
+            "scopes": self.scopes,
+            "bot_scopes": self.bot_scopes,
+            "auths": self.auths,
         }
 
 

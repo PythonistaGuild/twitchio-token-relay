@@ -19,6 +19,7 @@ import logging
 import secrets
 from typing import TYPE_CHECKING, Any
 
+import asyncpg
 import litestar
 from litestar.response import Redirect, Response
 
@@ -174,3 +175,47 @@ class SessionsController(litestar.Controller):
         }
 
         return data
+
+    @litestar.post("/apps")
+    async def create_app_endpoint(
+        self,
+        request: Request[str, str, State],
+        state: State,
+        data: dict[str, str],
+    ) -> Response[str] | dict[str, Any]:
+        if not request.session:
+            return Response("Unauthorized", status_code=401)
+
+        if not data:
+            return Response("Missing application data", status_code=400)
+
+        client_id = data.get("client_id")
+        name = data.get("name")
+
+        if not client_id or not name:
+            fields = ", ".join(["name" if not name else "", "client_id" if not client_id else ""])
+            return Response(f"Missing the following application fields: {fields}")
+
+        db: Database = state.db
+        rows = await db.fetch_user_by_id(request.session["id"])
+
+        if not rows:
+            request.clear_session()
+            return Response("Unauthorized", status_code=401)
+
+        first = rows[0]
+        if first.application_id is not None:
+            return Response("You currently have too many applications.", status_code=409)
+
+        try:
+            new_row = await db.create_app(first.id, name=name, client_id=client_id)
+        except asyncpg.UniqueViolationError:
+            return Response("An application with the provided Client-ID already exists.", status_code=403)
+
+        resp = {
+            "id": first.id,
+            "twitch_id": first.twitch_id,
+            "name": first.name,
+            "applications": [new_row.to_dict()],
+        }
+        return resp

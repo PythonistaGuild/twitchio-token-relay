@@ -86,6 +86,33 @@ class Database:
         assert row
         return row
 
+    async def create_app(self, user_id: int, *, name: str, client_id: str) -> ApplicationRecord:
+        query = """
+        INSERT INTO applications(id, user_id, client_id, name, url, scopes, bot_scopes) VALUES($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
+        """
+
+        id_ = secrets.token_hex(32)
+        url = secrets.token_hex(10)
+        scopes = ""
+        bot_scopes = ""
+
+        async with self.pool.acquire() as connection:
+            row: ApplicationRecord | None = await connection.fetchrow(
+                query,
+                id_,
+                user_id,
+                client_id,
+                name,
+                url,
+                scopes,
+                bot_scopes,
+                record_class=ApplicationRecord,
+            )
+
+        assert row
+        return row
+
     async def fetch_user_by_id(self, user_id: int) -> list[FullUserRecord]:
         query = """
         SELECT
