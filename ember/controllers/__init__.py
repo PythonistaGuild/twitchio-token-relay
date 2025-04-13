@@ -14,4 +14,5 @@ limitations under the License.
 """
 
 from .api import *
+from .oauth import *
 from .sessions import *
