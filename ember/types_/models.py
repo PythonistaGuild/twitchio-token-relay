@@ -35,6 +35,7 @@ class FullUserRecordDT(TypedDict, total=False):
     bot_scopes: str | None
     auths: int | None
     allowed: str | None
+    url: str | None
 
 
 class ApplicationRecordDT(TypedDict):

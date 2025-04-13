@@ -83,6 +83,7 @@ class FullUserRecord(asyncpg.Record):
     bot_scopes: str | None
     auths: int | None
     allowed: str | None
+    url: str | None
 
     def __getattr__(self, attr: str) -> Any:
         return self[attr]
@@ -109,6 +110,7 @@ class FullUserRecord(asyncpg.Record):
                 "bot_scopes": self.bot_scopes,
                 "auths": self.auths,
                 "allowed": self.allowed,
+                "url": self.url,
             }
         )
         return data

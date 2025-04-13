@@ -113,6 +113,53 @@ class Database:
         assert row
         return row
 
+    async def delete_app(self, id_: str) -> None:
+        query = """
+        DELETE FROM applications WHERE id = $1
+        """
+
+        async with self.pool.acquire() as connection:
+            await connection.execute(query, id_)
+
+    async def fetch_app_by_uri(self, uri: str) -> ApplicationRecord | None:
+        query = """
+        SELECT * FROM applications WHERE url = $1
+        """
+
+        async with self.pool.acquire() as connection:
+            row: ApplicationRecord | None = await connection.fetchrow(query, uri, record_class=ApplicationRecord)
+
+        return row
+
+    async def fetch_user_by_token(self, token: str) -> list[FullUserRecord]:
+        query = """
+        SELECT
+            u.*,
+            a.id AS application_id,
+            a.client_id,
+            a.name AS application_name,
+            a.scopes,
+            a.bot_scopes,
+            a.auths,
+            a.url,
+            w.allowed
+        FROM
+            users u
+        LEFT JOIN
+            applications a ON u.id = a.user_id
+        LEFT JOIN
+            whitelist w ON a.id = w.application_id
+        WHERE
+            u.token = $1
+        ORDER BY
+            a.id, w.allowed;
+        """
+
+        async with self.pool.acquire() as connection:
+            rows: list[FullUserRecord] = await connection.fetch(query, token, record_class=FullUserRecord)
+
+        return rows
+
     async def fetch_user_by_id(self, user_id: int) -> list[FullUserRecord]:
         query = """
         SELECT
@@ -123,6 +170,7 @@ class Database:
             a.scopes,
             a.bot_scopes,
             a.auths,
+            a.url,
             w.allowed
         FROM
             users u
@@ -151,6 +199,7 @@ class Database:
             a.scopes,
             a.bot_scopes,
             a.auths,
+            a.url,
             w.allowed
         FROM
             users u
