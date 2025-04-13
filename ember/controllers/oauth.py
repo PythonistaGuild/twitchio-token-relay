@@ -178,7 +178,7 @@ class OAuthController(litestar.Controller):
 
         first = user[0]
         if first.client_id != client_id:
-            raise HTTPException({"error": "The Client-ID already has an associated websocket connected."}, status_code=400)
+            raise HTTPException({"error": "Incorrect Client-ID passed."}, status_code=400)
 
         if client_id in state.clients:
             raise HTTPException({"error": "The Client-ID already has an associated websocket connected."}, status_code=409)
