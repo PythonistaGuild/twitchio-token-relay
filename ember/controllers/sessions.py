@@ -27,6 +27,8 @@ from ..config import config
 
 
 if TYPE_CHECKING:
+    import asyncio
+
     from aiohttp import ClientSession
     from litestar import Request
     from litestar.datastructures import State
@@ -219,3 +221,41 @@ class SessionsController(litestar.Controller):
             "applications": [new_row.to_dict()],
         }
         return resp
+
+    @litestar.delete("/apps", status_code=200)
+    async def delete_app_endpoint(
+        self,
+        request: Request[str, str, State],
+        state: State,
+        data: dict[str, str],
+    ) -> None | Response[str]:
+        if not request.session:
+            return Response("Unauthorized", status_code=401)
+
+        if not data:
+            return Response("Missing application data", status_code=400)
+
+        application_id = data.get("application_id")
+
+        if not application_id:
+            return Response("Missing 'application_id' field", status_code=400)
+
+        db: Database = state.db
+        rows = await db.fetch_user_by_id(request.session["id"])
+
+        if not rows:
+            request.clear_session()
+            return Response("Unauthorized", status_code=401)
+
+        first = rows[0]
+        if first.application_id != application_id:
+            return Response("Incorrect 'application_id' passed. No matching application", status_code=400)
+
+        try:
+            await db.delete_app(application_id)
+        except Exception as e:
+            return Response(f"Unexpected error occurred. Try again later: {e}", status_code=500)
+
+        queue: asyncio.Queue[Any] | None = state.clients.get(first.client_id, None)
+        if queue:
+            queue.shutdown(immediate=True)
