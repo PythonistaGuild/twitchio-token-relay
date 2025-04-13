@@ -34,6 +34,8 @@ from .database import Database
 
 
 if TYPE_CHECKING:
+    import asyncio
+
     from litestar import Controller
     from litestar.middleware import DefineMiddleware
     from litestar.stores.base import Store
@@ -48,6 +50,9 @@ async def dynamic_dist_route(name: str) -> File:
 class App(Litestar):
     def __init__(self, **kwargs: Any) -> None:
         self.config = config
+
+        # TODO
+        self.socket_map: dict[str, asyncio.Queue[Any]] = {}
 
         store = ValkeyStore.with_client(db=config["valkey"]["db"], port=config["valkey"]["port"])
         stores: dict[str, Store] = {"sessions": store}
@@ -64,7 +69,7 @@ class App(Litestar):
             path="/assets",
             directories=["eira/dist/assets"],
         )
-        handlers: list[type[Controller] | Router] = [APIControllerV1, SessionsController, static]
+        handlers: list[type[Controller] | Router] = [APIControllerV1, SessionsController, OAuthController, static]
 
         logging_config = LoggingConfig(
             root={"level": "INFO", "handlers": ["queue_listener"]},
@@ -114,6 +119,9 @@ class App(Litestar):
             )
             self.register(route)
 
+        # Set socket client queues...
+        app.state.clients = self.socket_map
+
     async def on_shutdown(self, app: Litestar) -> None:
         db: Database | None = app.state.get("db")
         sess: ClientSession | None = app.state.get("aiohttp")
@@ -123,3 +131,7 @@ class App(Litestar):
 
         if sess:
             await sess.close()
+
+        client: asyncio.Queue[dict[str, str]]
+        for client in app.state.clients.values():
+            client.shutdown(immediate=True)
