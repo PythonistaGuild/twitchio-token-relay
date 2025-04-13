@@ -6,6 +6,7 @@ export interface ApplicationDataT {
   bot_scopes: string;
   auths: number;
   allowed: string | null;
+  url: string;
 }
 
 export interface UserDataT {

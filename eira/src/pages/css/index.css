@@ -26,10 +26,24 @@ main {
 }
 
 .appDetails {
+  margin-top: 2rem;
   display: flex;
+  flex-direction: column;
   gap: 1rem;
   justify-content: space-between;
-  align-items: center;
+}
+
+.appDetails > span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-content: center;
+}
+
+.appDetails > span > span {
+  font-size: 0.8em;
+  font-weight: 400;
+  opacity: 95%;
 }
 
 .appForm {

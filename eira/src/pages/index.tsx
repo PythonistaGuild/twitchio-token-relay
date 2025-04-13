@@ -42,14 +42,30 @@ function Index() {
   }
 
   const getApps = () => {
+    const host = `${window.location.protocol}//${window.location.host}`;
     const apps = user?.applications.map((app) => {
       return (
         <div key={app.application_id}>
           <div className="appDetails">
-            <b className="lightPurple">{app.application_name}</b>
-            <span>{app.client_id}</span>
-            <button type="button" className="simpleButton">
-              Edit
+            <h2 className="lightPurple">{app.application_name}</h2>
+            <span>
+              <b>Application ID</b>
+              <span className="highlight">{app.application_id}</span>
+            </span>
+            <span>
+              <b>Client ID</b>
+              <span className="highlight">{app.client_id}</span>
+            </span>
+            <span>
+              <b>Auth URL</b>
+              <span className="highlight">{`${host}/oauth/${app.url}`}</span>
+            </span>
+            <span>
+              <b>Redirect URL</b>
+              <span className="highlight">{`${host}/oauth/redirect/${app.url}`}</span>
+            </span>
+            <button type="button" className="simpleButton redButton" onClick={deleteApp}>
+              Delete
             </button>
           </div>
           <hr className="hrW" />
@@ -115,6 +131,33 @@ function Index() {
 
     setShowForm(false);
     setUser(respData);
+  };
+
+  const deleteApp = async () => {
+    let resp: Response;
+
+    if (!user?.applications) {
+      return;
+    }
+
+    const data = {
+      application_id: user.applications[0].application_id,
+    };
+
+    try {
+      resp = await fetch("/users/apps", { method: "DELETE", credentials: "include", body: JSON.stringify(data) });
+    } catch (error) {
+      setError(`Unable to delete app: ${error}`);
+      return;
+    }
+
+    if (!resp.ok) {
+      const body = await resp.text();
+      setError(`Unable to delete app: ${body} (${resp.status})`);
+      return;
+    }
+
+    await fetchUser();
   };
 
   useEffect(() => {

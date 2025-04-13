@@ -5,6 +5,7 @@
   --primary-background: #fff;
   --highlight-color: #c6b1ef;
   --highlight-dark-color: #372f43;
+  --highlight-dark-color2: #483e57;
   --primary-background-90: #ffffffe6;
   --warning-red: #f37373;
   --purple: #8553f3;
@@ -102,9 +103,19 @@ h2 {
   transform: scale(0.99);
 }
 
+.redButton {
+  background-color: var(--warning-red);
+  color: var(--primary-background);
+}
+
 input {
   border: none;
   outline: none;
   padding: 1rem;
   border-radius: 0.25rem;
+}
+
+.highlight {
+  background-color: var(--highlight-dark-color2);
+  padding: 0.5rem;
 }
