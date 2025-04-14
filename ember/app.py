@@ -58,6 +58,7 @@ class App(Litestar):
         stores: dict[str, Store] = {"sessions": store}
 
         sessions = ServerSideSessionConfig(
+            session_id_bytes=64,
             max_age=config["sessions"]["max_age"],
             renew_on_access=True,
             secure=True,
