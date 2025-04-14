@@ -190,3 +190,21 @@ class OAuthController(litestar.Controller):
         await send_websocket_stream(socket=socket, stream=self.handler(queue), listen_for_disconnect=True)
 
         state.clients.pop(client_id, None)
+
+    @litestar.get("/status")
+    async def websocket_status_endpoint(self, request: Request[str, str, State], state: State) -> Redirect | dict[str, bool]:
+        if not request.session:
+            return Redirect("/")
+
+        db: Database = state.db
+        rows = await db.fetch_user_by_id(request.session["id"])
+
+        if not rows:
+            request.clear_session()
+            return Redirect("/")
+
+        first = rows[0]
+        client = state.clients.get(first.client_id)
+
+        data = {"status": bool(client)}
+        return data

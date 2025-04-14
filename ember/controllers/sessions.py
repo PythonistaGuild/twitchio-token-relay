@@ -24,6 +24,7 @@ import litestar
 from litestar.response import Redirect, Response
 
 from ..config import config
+from ..types_.models import UserRecordDT  # noqa: TC001 [Litestar uses this at runtime]
 
 
 if TYPE_CHECKING:
@@ -168,12 +169,14 @@ class SessionsController(litestar.Controller):
             return None
 
         first = rows[0]
+        client = state.clients.get(first.client_id)
 
         data = {
             "id": first.id,
             "twitch_id": first.twitch_id,
             "name": first.name,
             "applications": [app.to_dict() for app in rows if app.application_id is not None],
+            "status": bool(client),
         }
 
         return data
@@ -259,3 +262,20 @@ class SessionsController(litestar.Controller):
         queue: asyncio.Queue[Any] | None = state.clients.get(first.client_id, None)
         if queue:
             queue.shutdown(immediate=True)
+
+    @litestar.get("/token")
+    async def new_token_endpoint(self, request: Request[str, str, State], state: State) -> Redirect | UserRecordDT:
+        if not request.session:
+            return Redirect("/")
+
+        db: Database = state.db
+        rows = await db.fetch_user_by_id(request.session["id"])
+
+        if not rows:
+            request.clear_session()
+            return Redirect("/")
+
+        user = rows[0]
+        new = await db.update_token(user.id)
+
+        return new.to_dict()

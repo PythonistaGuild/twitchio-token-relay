@@ -71,6 +71,11 @@ class Database:
     async def __aexit__(self, *args: Any, **kwargs: Any) -> None:
         await self.close()
 
+    @classmethod
+    def generate_token(cls) -> str:
+        # Future proofing
+        return secrets.token_urlsafe(64)
+
     async def create_user(self, twitch_id: str, twitch_name: str) -> UserRecord:
         query = """
         INSERT INTO users (twitch_id, token, name) VALUES($1, $2, $3)
@@ -78,10 +83,21 @@ class Database:
         RETURNING *
         """
 
-        token = secrets.token_urlsafe(64)
+        token = self.generate_token()
 
         async with self.pool.acquire() as connection:
             row: UserRecord | None = await connection.fetchrow(query, twitch_id, token, twitch_name, record_class=UserRecord)
+
+        assert row
+        return row
+
+    async def update_token(self, user_id: int) -> UserRecord:
+        query = """UPDATE users SET token = $2 WHERE id = $1 RETURNING *"""
+
+        token = self.generate_token()
+
+        async with self.pool.acquire() as connection:
+            row: UserRecord | None = await connection.fetchrow(query, user_id, token, record_class=UserRecord)
 
         assert row
         return row
