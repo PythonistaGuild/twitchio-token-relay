@@ -10,6 +10,7 @@
   --warning-red: #f37373;
   --purple: #8553f3;
   --light-purple: #ae89ff;
+  --green: #45f248;
 }
 
 body,
@@ -52,6 +53,10 @@ p {
 
 .warningRed {
   color: var(--warning-red) !important;
+}
+
+.green {
+  color: var(--green) !important;
 }
 
 a {

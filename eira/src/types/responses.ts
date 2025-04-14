@@ -15,4 +15,5 @@ export interface UserDataT {
   name: string;
   token: string | null;
   applications: ApplicationDataT[];
+  status?: boolean | null;
 }

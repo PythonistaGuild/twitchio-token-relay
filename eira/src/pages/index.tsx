@@ -6,6 +6,7 @@ import { useCookies } from "react-cookie";
 
 function Index() {
   const [user, setUser] = useState<UserDataT>();
+  const [token, setToken] = useState<string | null>(null);
   const [, navigate] = useLocation();
   const [cookies, , removeCookie] = useCookies(["session"]);
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -160,6 +161,52 @@ function Index() {
     await fetchUser();
   };
 
+  const getToken = async () => {
+    let resp: Response;
+
+    if (!cookies.session) {
+      return navigate("/login");
+    }
+
+    try {
+      resp = await fetch("/users/token", { credentials: "include" });
+    } catch (error) {
+      console.error(error);
+      return navigate("/login");
+    }
+
+    if (!resp.ok) {
+      throw new Error(`Unable to fetch user data from API: ${resp.status}`);
+    }
+
+    const data: UserDataT = await resp.json();
+    if (!data) {
+      removeCookie("session", cookies.session);
+      return navigate("/login");
+    }
+
+    setToken(data.token);
+  };
+
+  const getStatus = () => {
+    if (!user) {
+      return "No Application";
+    }
+
+    if (user.applications.length === 0) {
+      return "No Application";
+    }
+
+    const app = user.applications[0];
+    const status = user.status ? <b className="green">Connected</b> : <b className="warningRed">Not Connected</b>;
+    return (
+      <div className="status">
+        <b style={{ fontSize: "1.1em" }}>{app.application_name}</b>
+        {status}
+      </div>
+    );
+  };
+
   useEffect(() => {
     fetchUser();
   }, []);
@@ -183,9 +230,17 @@ function Index() {
             <b className="lightPurple">API Token</b>
             <span>Your access token to TwitchIO Token Relay.</span>
             <span>To view this token you must generate a new one. You must keep this token confidential.</span>
-            <button type="button" className="simpleButton">
+            <button type="button" className="simpleButton" onClick={getToken}>
               Generate Token
             </button>
+            {token ? (
+              <div className="appDetails">
+                <span>
+                  <b>API Token</b>
+                  <span className="highlight">{token}</span>
+                </span>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -220,6 +275,7 @@ function Index() {
 
         <div className="details">
           <h3>Status</h3>
+          <div>{user ? getStatus() : null}</div>
           <hr className="hrW" />
         </div>
       </main>
