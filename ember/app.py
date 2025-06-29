@@ -70,7 +70,7 @@ class App(Litestar):
             path="/assets",
             directories=["eira/dist/assets"],
         )
-        handlers: list[type[Controller] | Router] = [APIControllerV1, SessionsController, OAuthController, static]
+        handlers: list[type[Controller] | Router] = [SessionsController, OAuthController, static]
 
         logging_config = LoggingConfig(
             root={"level": "INFO", "handlers": ["queue_listener"]},
