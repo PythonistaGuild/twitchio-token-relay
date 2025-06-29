@@ -59,7 +59,7 @@ class OAuthController(litestar.Controller):
         if not app:
             return Response("Application not found or not valid", status_code=404)
 
-        client: asyncio.Queue[str] | None = state.clients.get(app.client_id)
+        client: asyncio.Queue[str] | None = state.clients.get(app.id)
         if not client:
             return Response("Application can not be authenticated currently. No websocket found.", status_code=404)
 
@@ -121,7 +121,7 @@ class OAuthController(litestar.Controller):
         if not app:
             return Response("Error: This application no longer exists.")
 
-        client: asyncio.Queue[dict[str, str]] | None = state.clients.get(app.client_id)
+        client: asyncio.Queue[dict[str, str]] | None = state.clients.get(app.id)
         if not client:
             return Response("Error: Application can not be authenticated currently. No websocket found.", status_code=404)
 
@@ -162,13 +162,13 @@ class OAuthController(litestar.Controller):
         headers = socket.headers
 
         auth = headers.get("Authorization")
-        client_id = headers.get("Client-ID")
+        app_id = headers.get("Application-ID")
 
         if not auth:
             raise HTTPException({"error": "Unauthorized. No Authorization header present."}, status_code=401)
 
-        if not client_id:
-            raise HTTPException({"error": "Missing 'Client-ID' header."}, status_code=400)
+        if not app_id:
+            raise HTTPException({"error": "Missing 'Application-ID' header."}, status_code=400)
 
         db: Database = state.db
         user = await db.fetch_user_by_token(auth)
@@ -177,19 +177,24 @@ class OAuthController(litestar.Controller):
             raise HTTPException({"error": "Unauthorized. No user matches the provided token."}, status_code=401)
 
         first = user[0]
-        if first.client_id != client_id:
-            raise HTTPException({"error": "Incorrect Client-ID passed."}, status_code=400)
+        if first.application_id != app_id:
+            raise HTTPException({"error": "Incorrect Application-ID passed."}, status_code=400)
 
-        if client_id in state.clients:
-            raise HTTPException({"error": "The Client-ID already has an associated websocket connected."}, status_code=409)
+        if app_id in state.clients:
+            raise HTTPException(
+                {"error": "The Application-ID already has an associated websocket connected."}, status_code=409
+            )
 
         queue: asyncio.Queue[dict[str, str]] = asyncio.Queue()
-        state.clients[client_id] = queue
+        state.clients[app_id] = queue
 
-        await socket.accept()
-        await send_websocket_stream(socket=socket, stream=self.handler(queue), listen_for_disconnect=True)
+        try:
+            await socket.accept()
+            await send_websocket_stream(socket=socket, stream=self.handler(queue), listen_for_disconnect=True)
+        except Exception:
+            state.clients.pop(app_id, None)
 
-        state.clients.pop(client_id, None)
+        state.clients.pop(app_id, None)
 
     @litestar.get("/status")
     async def websocket_status_endpoint(self, request: Request[str, str, State], state: State) -> Redirect | dict[str, bool]:
@@ -204,7 +209,7 @@ class OAuthController(litestar.Controller):
             return Redirect("/")
 
         first = rows[0]
-        client = state.clients.get(first.client_id)
+        client = state.clients.get(first.application_id)
 
         data = {"status": bool(client)}
         return data

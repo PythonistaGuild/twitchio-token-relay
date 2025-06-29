@@ -169,7 +169,7 @@ class SessionsController(litestar.Controller):
             return None
 
         first = rows[0]
-        client = state.clients.get(first.client_id)
+        client = state.clients.get(first.application_id)
 
         data = {
             "id": first.id,
@@ -195,11 +195,19 @@ class SessionsController(litestar.Controller):
             return Response("Missing application data", status_code=400)
 
         client_id = data.get("client_id")
-        name = data.get("name")
+        name = data.get(
+            "name",
+        )
 
         if not client_id or not name:
             fields = ", ".join(["name" if not name else "", "client_id" if not client_id else ""])
-            return Response(f"Missing the following application fields: {fields}")
+            return Response(f"Missing the following application fields: {fields}", status_code=400)
+
+        if len(name) > 50:
+            return Response("Name cannot be longer than 50 characters long.", status_code=400)
+
+        elif len(client_id) > 50:
+            return Response("Invalid client_id passed.")
 
         db: Database = state.db
         rows = await db.fetch_user_by_id(request.session["id"])
@@ -259,7 +267,7 @@ class SessionsController(litestar.Controller):
         except Exception as e:
             return Response(f"Unexpected error occurred. Try again later: {e}", status_code=500)
 
-        queue: asyncio.Queue[Any] | None = state.clients.get(first.client_id, None)
+        queue: asyncio.Queue[Any] | None = state.clients.get(first.application_id, None)
         if queue:
             queue.shutdown(immediate=True)
 
