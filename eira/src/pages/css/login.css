@@ -65,3 +65,17 @@
   height: 3rem;
   width: auto;
 }
+
+@media only screen and (max-width: 768px) {
+  .loginLeft {
+    width: 100%;
+  }
+
+  .loginRight {
+    width: 100%;
+  }
+
+  #root {
+    flex-direction: column;
+  }
+}

@@ -39,6 +39,7 @@ main {
   flex-direction: column;
   gap: 0.5rem;
   align-content: center;
+  overflow-wrap: anywhere;
 }
 
 .appDetails > span > span {
