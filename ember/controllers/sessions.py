@@ -288,4 +288,8 @@ class SessionsController(litestar.Controller):
         user = rows[0]
         new = await db.update_token(user.id)
 
+        queue: asyncio.Queue[Any] | None = state.clients.get(user.application_id, None)
+        if queue:
+            queue.shutdown(immediate=True)
+
         return new.to_dict()
