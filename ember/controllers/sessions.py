@@ -273,7 +273,7 @@ class SessionsController(litestar.Controller):
         if queue:
             queue.shutdown(immediate=True)
 
-    @litestar.get("/token")
+    @litestar.post("/token")
     async def new_token_endpoint(self, request: Request[str, str, State], state: State) -> Redirect | UserRecordDT:
         if not request.session:
             return Redirect("/")

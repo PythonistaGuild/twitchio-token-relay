@@ -169,7 +169,7 @@ function Index() {
     }
 
     try {
-      resp = await fetch("/users/token", { credentials: "include" });
+      resp = await fetch("/users/token", { credentials: "include", "method": "POST" });
     } catch (error) {
       console.error(error);
       return navigate("/login");
