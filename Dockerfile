@@ -1,10 +1,19 @@
 FROM node:latest AS frontend
 
-WORKDIR /frontend
-COPY /eira /frontend
+ENV NODE_ENV=development
 
-RUN npm install -g npm
-RUN npm install --force
+RUN npm i -g npm
+
+RUN mkdir /build
+RUN mkdir /build/node_modules
+RUN mkdir /build/dist
+
+WORKDIR /build
+
+COPY eira ./
+
+RUN npm install
+RUN npm run build
 
 FROM python:3.13.5-slim
 
@@ -31,6 +40,6 @@ COPY ember/requirements.txt ./
 RUN pip install -Ur requirements.txt
 
 COPY /ember /app/
-COPY --from=frontend /frontend/dist eira/dist
+COPY --from=frontend /build/dist /app/eira/dist
 
 ENTRYPOINT python -O main.py
