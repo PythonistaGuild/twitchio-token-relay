@@ -95,13 +95,16 @@ function LoginPage() {
         </div>
         <h1>How it works</h1>
         <hr />
-        After you login and create an application on your dashboard you will be provided with two URLs.<br/>
+        <p>
+          After you login and create an application on your dashboard you will be provided with two URLs.<br/><br/>
 
-        When a user visits the provided <b>Auth URL</b> with your chosen scopes, they are redirected to authenticate on Twitch as standard.<br/>
-        When a user successfully authenticates your application Twitch sends us a "code" as part of the OAuth flow. This code is sent to
-        your bot securely via authenticated websocket for you to complete the flow, without ever exchanging secrets.<br/><br/>
+          When a user visits the provided <b>Auth URL</b> with your chosen scopes, they are redirected to authenticate on Twitch as standard.<br/>
+          When a user successfully authenticates your application Twitch sends us a "code" as part of the OAuth flow. This code is sent to
+          your bot securely via authenticated websocket for you to complete the flow: The token relay has no access the the authenticated user's data.<br/><br/>
 
-        <b className="warningRed">NEVER</b> send anyone your Client-Secret, including to this or anyone claiming to be this website!
+          <b className="warningRed">NEVER</b> send anyone your Client-Secret, including to this or anyone claiming to be this website!
+        </p>
+
       </div>
 
       <div className="loginRight">
