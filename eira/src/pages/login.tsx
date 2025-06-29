@@ -47,7 +47,6 @@ function LoginPage() {
         <hr />
 
         <div className="infoSec">
-          <h3>About</h3>
           <p>
             The TwitchIO Token Relay is a service provided to relay OAuth requests from Twitch to your Twitch
             Application. We do this by providing a public URL that you, or anyone else wanting to use your application,
@@ -55,8 +54,8 @@ function LoginPage() {
             over websockets, so you don't need a public domain or exposed IP with open ports.
             <br />
             <br />
-            We <b className="warningRed">DO NOT</b> store tokens or any other secret information relating to your
-            application.
+            We <b className="warningRed">DO NOT</b> store or ask for tokens or secrets or any other secret information relating to your
+            Twitch application.
             <br />
             <br />
             We <b className="warningRed">DO</b> store your Twitch User ID and Twitch Application Client-ID.
@@ -94,6 +93,15 @@ function LoginPage() {
             </ul>
           </p>
         </div>
+        <h1>How it works</h1>
+        <hr />
+        After you login and create an application on your dashboard you will be provided with two URLs.<br/>
+
+        When a user visits the provided <b>Auth URL</b> with your chosen scopes, they are redirected to authenticate on Twitch as standard.<br/>
+        When a user successfully authenticates your application Twitch sends us a "code" as part of the OAuth flow. This code is sent to
+        your bot securely via authenticated websocket for you to complete the flow, without ever exchanging secrets.<br/><br/>
+
+        <b className="warningRed">NEVER</b> send anyone your Client-Secret, including to this or anyone claiming to be this website!
       </div>
 
       <div className="loginRight">
