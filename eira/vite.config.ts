@@ -8,7 +8,7 @@ function getEntries(): Record<string, string> {
   const entries: Record<string, string> = {};
 
   globSync("./html/*.html").map((e) => {
-    const match = e.match(/\\(.*).html/);
+    const match = e.match(/\\|\/(.*).html/);
     // @ts-ignore
     const name: string = match[1];
 
