@@ -1,0 +1,45 @@
+services:
+  web:
+    build: .
+    ports: 
+      - "4141:4141"
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+        restart: true
+      valkey:
+        condition: service_healthy
+        restart: true
+
+  database:
+    image: postgres:16
+    container_name: tio-relay-database
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    env_file: .env
+    environment:
+      - PG_DATA=/var/lib/postgresql/data
+      - POSTGRES_DB=tio
+    volumes:
+      - tio-relay-database_pg_data:/var/lib/postgresql/data
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: tio-relay-valkey
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - tio-relay-valkey_data:/data
+
+volumes:
+  tio-relay-database_pg_data:
+  tio-relay-valkey_data:
