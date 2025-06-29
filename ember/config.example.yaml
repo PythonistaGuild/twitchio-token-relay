@@ -1,0 +1,16 @@
+server:
+  port: 4141
+  host: 0.0.0.0
+  domain: http://localhost:4141
+  build: "eira/dist/html"
+sessions:
+  max_age: 604800
+valkey:
+  db: 0
+  host: valkey
+  port: 6379
+database:
+  dsn: postgres://tio:tio@database:5432/tio
+twitch:
+  client_id: ...
+  client_secret: ...

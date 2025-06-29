@@ -18,7 +18,8 @@ import logging
 
 import uvicorn
 
-from ember import App, config
+from app import App as App
+from config import config as config
 
 
 LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -42,8 +43,8 @@ def main() -> None:
             forwarded_allow_ips="*",
             factory=True,
         )
-        server = uvicorn.Server(conf)
 
+        server = uvicorn.Server(conf)
         await server.serve()
 
     try:

@@ -26,7 +26,7 @@ from litestar.exceptions import HTTPException
 from litestar.handlers import send_websocket_stream  # type: ignore
 from litestar.response import Redirect, Response
 
-from ..config import config
+from config import config
 
 
 if TYPE_CHECKING:
@@ -128,7 +128,7 @@ class OAuthController(litestar.Controller):
         domain = config["server"]["domain"]
         redirect = f"{domain}/oauth/redirect/{app.url}"
 
-        data = {
+        data: dict[str, str] = {
             "code": code,
             "grant_type": "authorization_code",
             "redirect_uri": redirect,

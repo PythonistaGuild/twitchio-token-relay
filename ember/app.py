@@ -28,9 +28,9 @@ from litestar.router import Router
 from litestar.static_files import create_static_files_router  # type: ignore
 from litestar.stores.valkey import ValkeyStore
 
-from .config import config
-from .controllers import *
-from .database import Database
+from config import config
+from controllers import *
+from database import Database
 
 
 if TYPE_CHECKING:
@@ -54,7 +54,8 @@ class App(Litestar):
         # TODO
         self.socket_map: dict[str, asyncio.Queue[Any]] = {}
 
-        store = ValkeyStore.with_client(db=config["valkey"]["db"], port=config["valkey"]["port"])
+        valurl: str = f'valkey://{config["valkey"]["host"]}:{config["valkey"]["port"]}'
+        store = ValkeyStore.with_client(valurl, port=config["valkey"]["port"])
         stores: dict[str, Store] = {"sessions": store}
 
         sessions = ServerSideSessionConfig(
@@ -98,7 +99,8 @@ class App(Litestar):
         app.state.db = db
 
         # State store...
-        store = ValkeyStore.with_client(db=config["valkey"]["db"], port=config["valkey"]["port"])
+        valurl: str = f'valkey://{config["valkey"]["host"]}:{config["valkey"]["port"]}'
+        store = ValkeyStore.with_client(valurl, db=config["valkey"]["db"])
         app.state.states = store
 
         # aiohttp Session

@@ -29,6 +29,7 @@ class SessionsT(TypedDict):
 
 class ValkeyT(TypedDict):
     db: int
+    host: str
     port: int
 
 

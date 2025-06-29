@@ -23,8 +23,8 @@ import asyncpg
 import litestar
 from litestar.response import Redirect, Response
 
-from ..config import config
-from ..types_.models import UserRecordDT  # noqa: TC001 [Litestar uses this at runtime]
+from config import config
+from types_.models import UserRecordDT  # noqa: TC001 [Litestar uses this at runtime]
 
 
 if TYPE_CHECKING:
@@ -34,6 +34,8 @@ if TYPE_CHECKING:
     from litestar import Request
     from litestar.datastructures import State
     from litestar.stores.valkey import ValkeyStore
+
+    from models import UserRecord
 
     from ..database import Database
 
@@ -121,7 +123,7 @@ class SessionsController(litestar.Controller):
 
         await states.delete(state_)
 
-        data = {
+        sdata: dict[str, str] = {
             "client_id": config["twitch"]["client_id"],
             "client_secret": config["twitch"]["client_secret"],
             "code": code,
@@ -131,7 +133,7 @@ class SessionsController(litestar.Controller):
 
         sess: ClientSession = state.aiohttp
 
-        async with sess.post(TWITCH_TOKEN_URL, data=data, headers=self.headers) as resp:
+        async with sess.post(TWITCH_TOKEN_URL, data=sdata, headers=self.headers) as resp:
             if resp.status > 200:
                 return Response("An internal error occurred. Try again.", status_code=500)
 
@@ -151,7 +153,7 @@ class SessionsController(litestar.Controller):
             Response("An internal error occurred. Try again.", status_code=500)
 
         db: Database = state.db
-        data = await db.create_user(user_id, user_login)
+        data: UserRecord = await db.create_user(user_id, user_login)
 
         request.set_session(data.to_dict(include_token=False))  # type: ignore
         return Redirect("/")
@@ -171,7 +173,7 @@ class SessionsController(litestar.Controller):
         first = rows[0]
         client = state.clients.get(first.application_id)
 
-        data = {
+        data: dict[str, Any] = {
             "id": first.id,
             "twitch_id": first.twitch_id,
             "name": first.name,
@@ -225,7 +227,7 @@ class SessionsController(litestar.Controller):
         except asyncpg.UniqueViolationError:
             return Response("An application with the provided Client-ID already exists.", status_code=403)
 
-        resp = {
+        resp: dict[str, Any] = {
             "id": first.id,
             "twitch_id": first.twitch_id,
             "name": first.name,

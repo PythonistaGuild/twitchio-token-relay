@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any, Self
 
 import asyncpg
 
-from .models import *
+from models import *
 
 
 LOGGER: logging.Logger = logging.getLogger(__name__)
