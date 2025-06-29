@@ -2,7 +2,8 @@
 
 :root {
   --primary-color: #2b2b2b;
-  --primary-background: #fff;
+  --primary-background: #221a2b;
+  --primary-font: #FFF;
   --highlight-color: #c6b1ef;
   --highlight-dark-color: #372f43;
   --highlight-dark-color2: #483e57;
@@ -28,6 +29,10 @@ body {
   background-color: var(--primary-background);
 }
 
+#root {
+  min-height: 100vh;
+}
+
 hr {
   border: none;
   border-bottom: solid 1px var(--primary-color);
@@ -36,7 +41,7 @@ hr {
 }
 
 .hrW {
-  border-color: var(--primary-background);
+  border-color: var(--primary-font);
 }
 
 h1,
@@ -86,7 +91,7 @@ h2 {
 .simpleButton {
   display: flex;
   background-color: var(--purple);
-  color: var(--primary-background);
+  color: var(--primary-font);
   border-radius: 0.5rem;
   padding: 1rem;
   font-weight: 600;
@@ -97,6 +102,7 @@ h2 {
   border: none;
   user-select: none;
   width: fit-content;
+  text-decoration: none;
 }
 
 .simpleButton:hover {
@@ -110,7 +116,7 @@ h2 {
 
 .redButton {
   background-color: var(--warning-red);
-  color: var(--primary-background);
+  color: var(--primary-font);
 }
 
 input {

@@ -50,11 +50,11 @@ function Index() {
           <div className="appDetails">
             <h2 className="lightPurple">{app.application_name}</h2>
             <span>
-              <b>Application ID</b>
+              <b>Application-ID</b>
               <span className="highlight">{app.application_id}</span>
             </span>
             <span>
-              <b>Client ID</b>
+              <b>Twitch Client-ID</b>
               <span className="highlight">{app.client_id}</span>
             </span>
             <span>
@@ -223,8 +223,11 @@ function Index() {
           </div>
           <div className="innerDetails">
             <b className="lightPurple">Twitch</b>
-            {user?.name} | {user?.twitch_id}
+            {user?.name} | {user?.twitch_id} 
           </div>
+          <a href="/users/logout" type="button" className="simpleButton">
+              Logout
+          </a>
 
           <div className="innerDetails">
             <b className="lightPurple">API Token</b>
@@ -250,6 +253,11 @@ function Index() {
           <span>
             Currently the <b>TwitchIO Token Relay</b> service only allows one application per user.
           </span>
+          <span>
+            After creating your app, select scopes by visiting the <a href="https://chillymosh.com/tools/twitch-scopes/" target="_blank">Scope Selector</a>. 
+            Select the <b>Custom URL</b> option and paste in the <b>Auth URL</b> from below.<br/>
+            You should add the <b>Redirect URL</b> below to your application on the <a href="https://dev.twitch.tv/console">Twitch Developer Console</a>.
+          </span>
           {getApps()}
           {showForm ? (
             <div className="appForm">
@@ -262,7 +270,7 @@ function Index() {
               </span>
               <input type="text" ref={nameRef} />
               <span className="lightPurple">
-                <b>Client-ID:</b>
+                <b>Twitch Client-ID:</b>
               </span>
               <input type="text" ref={cidRef} />
               {error ? <span className="warningRed">{error}</span> : null}

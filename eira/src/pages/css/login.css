@@ -2,14 +2,14 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .loginLeft {
   display: flex;
   flex-direction: column;
   width: 50%;
-  background-color: var(--primary-color);
+  background-color: #2d556b;
   color: var(--primary-background-90);
   padding: 2rem;
   scrollbar-width: thin;
@@ -18,7 +18,7 @@
 }
 
 .loginLeft > hr {
-  border-color: var(--primary-background);
+  border-color: var(--primary-font);
 }
 
 .loginRight {
@@ -28,6 +28,7 @@
   padding: 2rem;
   align-items: center;
   justify-content: center;
+  color: var(--primary-font);
 }
 
 .infoSec {
@@ -46,7 +47,7 @@
   margin-top: 2rem;
   display: flex;
   background-color: var(--highlight-dark-color);
-  color: var(--primary-background);
+  color: var(--primary-font);
   padding: 1rem;
   border-radius: 0.5rem;
   justify-content: center;
