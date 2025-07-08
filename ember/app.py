@@ -1,4 +1,4 @@
-"""Copyright 2025 PythonistaGuild
+"""Copyright (c) 2025 PythonistaGuild
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,129 +12,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
-from __future__ import annotations
-
-import pathlib
-from typing import TYPE_CHECKING, Any
-
-from aiohttp import ClientSession
-from litestar import Litestar, get
-from litestar.logging import LoggingConfig
-from litestar.middleware.session.server_side import ServerSideSessionConfig
-from litestar.params import ParameterKwarg
-from litestar.response.file import File
-from litestar.router import Router
-from litestar.static_files import create_static_files_router  # type: ignore
-from litestar.stores.valkey import ValkeyStore
-
-from config import config
+from starlette_plus import Application, Redis, Request
+from starlette_plus.middleware import RatelimitMiddleware, SessionMiddleware
+from starlette.staticfiles import StaticFiles
+from starlette.middleware import Middleware
+from starlette.responses import FileResponse
 from controllers import *
-from database import Database
+from config import config
 
+class App(Application):
 
-if TYPE_CHECKING:
-    import asyncio
+    def __init__(self) -> None:
+        redis = Redis(url=config["valkey"]["url"])
+        ratelimiter = Middleware(RatelimitMiddleware, ignore_localhost=False, redis=redis)
+        session = Middleware(SessionMiddleware, max_age=config["sessions"]["max_age"], secret=config["sessions"]["secret"], redis=redis,)
+        super().__init__(access_log=True, views=[APIView(self)], middleware=[ratelimiter, session])
 
-    from litestar import Controller
-    from litestar.middleware import DefineMiddleware
-    from litestar.stores.base import Store
+        self.mount("/static", app=StaticFiles(directory="eira/dist"), name="static")
+        self.add_route("/dashboard", self.frontend_route)
+        self.add_route("/dashboard/{path}", self.frontend_route)
 
-
-@get("/")
-async def dynamic_dist_route(name: str) -> File:
-    dist = config["server"]["build"]
-    return File(f"{dist}/{name}.html", media_type="text/html", content_disposition_type="inline")
-
-
-class App(Litestar):
-    def __init__(self, **kwargs: Any) -> None:
-        self.config = config
-
-        # TODO
-        self.socket_map: dict[str, asyncio.Queue[Any]] = {}
-
-        valurl: str = f'valkey://{config["valkey"]["host"]}:{config["valkey"]["port"]}'
-        store = ValkeyStore.with_client(valurl, port=config["valkey"]["port"])
-        stores: dict[str, Store] = {"sessions": store}
-
-        sessions = ServerSideSessionConfig(
-            session_id_bytes=64,
-            max_age=config["sessions"]["max_age"],
-            renew_on_access=True,
-            secure=True,
-            httponly=False,
-        )
-        middleware: list[DefineMiddleware] = [sessions.middleware]
-
-        static = create_static_files_router(
-            path="/assets",
-            directories=["eira/dist/assets"],
-        )
-        handlers: list[type[Controller] | Router] = [SessionsController, OAuthController, static]
-
-        logging_config = LoggingConfig(
-            root={"level": "INFO", "handlers": ["queue_listener"]},
-            formatters={"standard": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}},
-            log_exceptions="always",
-        )
-
-        super().__init__(  # type: ignore
-            route_handlers=handlers,
-            stores=stores,
-            middleware=middleware,
-            on_startup=[self.on_startup],
-            on_shutdown=[self.on_shutdown],
-            logging_config=logging_config,
-            **kwargs,
-        )
-
-    async def on_startup(self, app: Litestar) -> None:
-        # Database...
-        dsn = config["database"]["dsn"]
-
-        db = Database(dsn=dsn)
-        await db.connect()
-
-        app.state.db = db
-
-        # State store...
-        valurl: str = f'valkey://{config["valkey"]["host"]}:{config["valkey"]["port"]}'
-        store = ValkeyStore.with_client(valurl, db=config["valkey"]["db"])
-        app.state.states = store
-
-        # aiohttp Session
-        session = ClientSession()
-        app.state.aiohttp = session
-
-        # Add built routes from frontend
-        dist = config["server"]["build"]
-        root = pathlib.Path(dist)
-
-        for path in root.glob("*.html"):
-            name = path.name.removesuffix(".html")
-            route_path = f"/{name}" if name != "index" else "/"
-
-            route = Router(
-                route_path,
-                route_handlers=[dynamic_dist_route],
-                parameters={"name": ParameterKwarg(default=name, const=True)},
-            )
-            self.register(route)
-
-        # Set socket client queues...
-        app.state.clients = self.socket_map
-
-    async def on_shutdown(self, app: Litestar) -> None:
-        db: Database | None = app.state.get("db")
-        sess: ClientSession | None = app.state.get("aiohttp")
-
-        if db:
-            await db.close()
-
-        if sess:
-            await sess.close()
-
-        client: asyncio.Queue[dict[str, str]]
-        for client in app.state.clients.values():
-            client.shutdown(immediate=True)
+    async def frontend_route(self, request: Request) -> FileResponse:
+        return FileResponse("eira/dist/index.html", media_type="text/html", content_disposition_type="inline")

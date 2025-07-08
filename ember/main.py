@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+import starlette_plus
 import asyncio
 import logging
 
@@ -31,6 +31,8 @@ def create_app() -> App:
 
 
 def main() -> None:
+    starlette_plus.setup_logging(level=20, root=True)
+    
     host = config["server"]["host"]
     port = config["server"]["port"]
 
@@ -42,6 +44,7 @@ def main() -> None:
             proxy_headers=True,
             forwarded_allow_ips="*",
             factory=True,
+            access_log=False,
         )
 
         server = uvicorn.Server(conf)

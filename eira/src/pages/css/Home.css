@@ -1,0 +1,82 @@
+main {
+	display: flex;
+	flex-direction: row;
+	background: linear-gradient(
+		to right,
+		var(--primary-background),
+		var(--secondary-background)
+	);
+}
+
+.left,
+.right {
+	opacity: 1;
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	padding: 1rem;
+}
+
+.left {
+	width: 60%;
+	/* box-shadow: rgba(0, 0, 0, 0.1) 10px 10px 12px; */
+	align-items: center;
+	justify-content: center;
+}
+
+.left p {
+	color: var(--secondary-color);
+}
+
+.right {
+	flex: 1;
+	justify-content: center;
+	align-items: center;
+}
+
+.loginButton {
+	display: flex;
+	align-items: center;
+	padding: 1rem 4rem;
+	border-radius: 0.5rem;
+	background-color: var(--twitch-purple);
+	justify-content: center;
+	gap: 1rem;
+	font-weight: 600;
+	color: var(--primary-color);
+}
+
+.loginButton > img {
+	height: 2.5rem;
+	width: auto;
+}
+
+.socials {
+	display: flex;
+	gap: 4rem;
+	position: absolute;
+	bottom: 2rem;
+	color: var(--primary-bb);
+	font-size: 0.8em;
+}
+
+
+@media only screen and (max-width: 768px) {
+	main {
+		min-height: 100vh;
+		flex-direction: column;
+	}
+
+	.left,
+	.right {
+		height: unset !important;
+	}
+
+	.left {
+		width: 100%;
+	}
+
+	.right {
+		flex-grow: 1;
+	}
+}

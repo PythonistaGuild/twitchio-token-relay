@@ -12,38 +12,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
-from typing import TypedDict
-
-
-class ServerT(TypedDict):
-    port: int
-    host: str
-    domain: str
-    build: str
+from starlette_plus import View, route, Response, Request
 
 
-class SessionsT(TypedDict):
-    max_age: int
-    secret: str
-
-
-class ValkeyT(TypedDict):
-    url: str
-
-
-class DatabaseT(TypedDict):
-    dsn: str
-
-
-class TwitchT(TypedDict):
-    client_id: str
-    client_secret: str
-
-
-class ConfigT(TypedDict):
-    server: ServerT
-    sessions: SessionsT
-    valkey: ValkeyT
-    database: DatabaseT
-    twitch: TwitchT
+class APIView(View):
+    
+    @route("/login", methods=["GET"], prefix=False)
+    async def login(self, request: Request) -> Response:
+        return Response(status_code=200, content="asfhjshjdfg")
+        
+    @route("/logout", methods=["GET"], prefix=False)
+    async def logout(self) -> Response:
+        ...
+    
+    @route("/login/redirect", prefix=False)
+    async def login_callback(self) -> ...:
+        ...

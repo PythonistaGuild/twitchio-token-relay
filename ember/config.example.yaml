@@ -5,6 +5,7 @@ server:
   build: "eira/dist/html"
 sessions:
   max_age: 604800
+  secret: ""
 valkey:
   db: 0
   host: valkey

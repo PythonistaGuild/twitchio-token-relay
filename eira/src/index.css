@@ -1,0 +1,115 @@
+@font-face {
+	font-family: "Segoe";
+	src: url("/static/segoe.ttf") format("truetype");
+}
+
+:root {
+	--primary-background: #12131a;
+	--secondary-background: #28283f;
+	--primary-color: #ffffff;
+	--secondary-color: #dddddd;
+	--primary-10: #ffffff10;
+	--primary-bb: #ffffffbb;
+	--twitch-purple: #9146ff;
+	--link-color: #a8a8e7;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+	margin: 0;
+	background-color: var(--primary-background);
+	font-family: "Segoe";
+	width: 100vw;
+	min-height: 100vh;
+	color: var(--primary-color);
+}
+
+a {
+	color: var(--link-color);
+	text-decoration: none;
+}
+
+a:hover {
+	filter: brightness(110%);
+}
+
+h1 {
+	font-size: 3em;
+}
+
+h2 {
+	font-size: 2.2em;
+}
+
+.button {
+	user-select: none;
+}
+
+.button:hover {
+	filter: brightness(105%);
+	cursor: pointer;
+}
+
+.button:active {
+	transform: scale(0.99);
+}
+
+.embla {
+	overflow: hidden;
+	width: 50%;
+	margin: 1rem;
+}
+
+.embla__container {
+	display: flex;
+}
+
+.embla__slide {
+	flex: 0 0 100%;
+	min-width: 0;
+	color: var(--secondary-color);
+	font-size: .85em;
+	font-weight: 400;
+	text-align: center;
+}
+
+.sliderButtons {
+	display: flex;
+	margin: auto;
+	margin: 1rem;
+	justify-content: space-between;
+}
+
+.sliderButton {
+	display: flex;
+	appearance: none;
+	box-shadow: none;
+	border: 1px solid var(--primary-10);
+	background: none!important;
+	align-items: center;
+	justify-content: center;
+	border-radius: 1rem;
+	user-select: none;
+}
+
+.sliderButton.leftButton {
+	padding: 0.2rem 0.2rem 0.1rem 0.1rem;
+}
+
+.sliderButton.rightButton {
+	padding: 0.2rem 0.1rem 0.1rem 0.2rem;
+}
+
+.sliderButton:hover {
+	cursor: pointer;
+	filter: brightness(105%);
+}
+
+.blue {
+	color: var(--link-color);
+}
